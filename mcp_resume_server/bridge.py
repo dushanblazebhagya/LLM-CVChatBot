@@ -5,7 +5,6 @@ from server import query_resume_tool, send_email_tool
 
 app = FastAPI()
 
-# Enable CORS for localhost + public IP
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,7 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Resume query endpoint
+# Resume
 @app.post("/query_resume")
 async def query_resume_endpoint(payload: dict):
     question = payload.get("question", "")
@@ -25,7 +24,7 @@ async def query_resume_endpoint(payload: dict):
     except Exception as e:
         return {"error": str(e)}
 
-# Send email endpoint
+# Send
 @app.post("/send_email")
 async def send_email_endpoint(payload: dict):
     recipient = payload.get("recipient", "")
