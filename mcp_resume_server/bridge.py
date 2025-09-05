@@ -5,10 +5,10 @@ from server import query_resume_tool, send_email_tool
 
 app = FastAPI()
 
-# Enable CORS for frontend on localhost and remote IP
+# Enable CORS for localhost + public IP
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # can be restricted to your domains
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

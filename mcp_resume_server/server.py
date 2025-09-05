@@ -7,20 +7,26 @@ from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
 import openai
 
+# Load .env variables
 load_dotenv()
 
-# Load resume JSON
+# Load resume
 with open("resume.json", "r", encoding="utf-8") as f:
     resume = json.load(f)
 
+# Set OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# Create MCP server
 mcp = FastMCP("resume-server")
 
-
+# -----------------------------
+# Resume Tool (LLM-driven)
+# -----------------------------
 def query_resume_tool(question: str) -> str:
     """
     Sends resume JSON + user question to OpenAI GPT.
+    Handles greetings and arbitrary input.
     """
     try:
         system_prompt = (
@@ -30,7 +36,7 @@ def query_resume_tool(question: str) -> str:
             "Only use information from the resume JSON provided."
         )
 
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -39,12 +45,13 @@ def query_resume_tool(question: str) -> str:
             temperature=0
         )
 
-        return response.choices[0].message['content']
-
+        return response.choices[0].message.content
     except Exception as e:
         return f"LLM Error: {e}"
 
-
+# -----------------------------
+# Email Tool (async)
+# -----------------------------
 async def send_email_async(recipient: str, subject: str, body: str) -> str:
     msg = EmailMessage()
     msg["From"] = os.getenv("EMAIL_ADDRESS")
@@ -64,14 +71,21 @@ async def send_email_async(recipient: str, subject: str, body: str) -> str:
     except Exception as e:
         return f"Failed to send email: {e}"
 
-
 def send_email_tool(recipient: str, subject: str, body: str) -> dict:
+    """
+    Returns a dict for MCP reasoning.
+    """
     result = asyncio.run(send_email_async(recipient, subject, body))
     return {"status": result}
 
-
+# -----------------------------
+# Register tools with MCP
+# -----------------------------
 mcp.tool()(query_resume_tool)
 mcp.tool()(send_email_tool)
 
+# -----------------------------
+# Run MCP server
+# -----------------------------
 if __name__ == "__main__":
     mcp.run()
