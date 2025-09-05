@@ -1,0 +1,7 @@
+-e git+https://github.com/modelcontextprotocol/python-sdk.git#egg=mcp
+rapidfuzz
+aiosmtplib
+python-dotenv
+openai
+fastapi
+uvicorn
